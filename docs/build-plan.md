@@ -18,17 +18,17 @@ North star: the implementation acceptance test (§142).
 
 ## Milestone 1 — Foundation (§90.2–10)
 
-- [ ] `packages/db`: Kysely + SQL migrations, tenant scoping, RLS
-- [ ] Tenant model (organisations, users, memberships)
-- [ ] `packages/auth`: opaque sessions, password hashing, TOTP MFA (encrypted secret, hashed backup codes), step-up auth
-- [ ] RBAC: customer roles + permissions, enforced server-side
-- [ ] Append-only audit log
+- [x] `packages/db`: Kysely + checksummed SQL migrations, tenant/system scoping, RLS
+- [x] Tenant model (organisations, users, memberships) + provisioning
+- [x] `packages/auth`: opaque sessions, scrypt passwords, lockout, TOTP MFA (encrypted secret, replay protection, hashed backup codes), step-up auth
+- [x] RBAC: customer roles + permissions, enforced server-side (`authorize`)
+- [x] Append-only audit log (`packages/audit`, DB-enforced)
 - [ ] `packages/features`: feature states (ON / OFF / BETA / INTERNAL), per environment and tenant
-- [ ] §101 schema skeleton
+- [ ] §101 schema: foundation, connector, evidence and integrity tables (rest per module, D-011)
 - [ ] Evidence vault (R2/S3 client, §109 layout)
 - [ ] Worker runtime: BullMQ queues mirrored in PostgreSQL job records, transactional outbox
 - [ ] Connector framework: `ConnectorAdapter`, credential refs, sync runs, cursors, health, test harness
-- [ ] Cross-tenant isolation tests
+- [x] Cross-tenant isolation tests (extended with every new tenant table)
 
 ## Milestone 2 — Evidence core (§90.11–18)
 

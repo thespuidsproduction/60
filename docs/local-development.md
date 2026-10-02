@@ -4,7 +4,7 @@ Requirements: Node 22 (`.nvmrc`), pnpm 10 (`corepack enable`), Docker.
 
 ```bash
 pnpm install
-docker compose -f infrastructure/docker-compose.dev.yml up -d   # Postgres, Redis, MinIO
+docker compose -f infrastructure/docker-compose.dev.yml up -d   # Postgres, Redis, SeaweedFS
 cp .env.example .env
 
 pnpm dev:web       # http://localhost:3000
@@ -28,4 +28,4 @@ docker build -f infrastructure/docker/web.Dockerfile -t platform-web .
 docker build -f infrastructure/docker/worker.Dockerfile -t platform-worker .
 ```
 
-Local Postgres and MinIO stand in for Supabase and Cloudflare R2 (see `docs/deviations.md`, D-001).
+Local Postgres and SeaweedFS stand in for Supabase and Cloudflare R2 (see `docs/deviations.md`, D-001).
