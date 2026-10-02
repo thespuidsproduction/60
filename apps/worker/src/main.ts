@@ -1,8 +1,10 @@
 import { Redis } from "ioredis"
 import { enqueueDueSyncs } from "@platform/connectors"
 import { createDb, sql } from "@platform/db"
+import { objectStoreFromEnv } from "@platform/evidence"
+import { enqueueSealing, registerSigningKeys } from "@platform/integrity"
 import { createJobRuntime } from "@platform/jobs"
-import { createLogger } from "@platform/shared"
+import { createLogger, createSecretBox, parseKeyRing } from "@platform/shared"
 import { loadWorkerConfig } from "./config"
 import { startHealthServer } from "./health"
 import { workerJobs } from "./jobs"
@@ -19,7 +21,16 @@ const connection = { url: config.REDIS_URL, maxRetriesPerRequest: null }
 const probe = new Redis(config.REDIS_URL, { maxRetriesPerRequest: 1, lazyConnect: true })
 probe.on("error", () => {})
 
-const { jobs, subscriptions } = workerJobs()
+const store = objectStoreFromEnv()
+await registerSigningKeys(db, config.MANIFEST_SIGNING_KEYS)
+const { jobs, subscriptions } = workerJobs({
+  environment: config.APP_ENV,
+  db,
+  store,
+  secretBox: createSecretBox(parseKeyRing(config.DATA_ENCRYPTION_KEYS)),
+  signingKeys: config.MANIFEST_SIGNING_KEYS,
+  log,
+})
 const runtime = createJobRuntime({
   db,
   connection,
@@ -54,6 +65,14 @@ const scheduleTimer = setInterval(() => {
     log.error("connector scheduling failed", { error }),
   )
 }, 60_000)
+const sealTimer = setInterval(
+  () => {
+    enqueueSealing(db, { intervalMs: config.INTEGRITY_SEAL_INTERVAL_MS }).catch((error) =>
+      log.error("integrity sealing schedule failed", { error }),
+    )
+  },
+  Math.min(config.INTEGRITY_SEAL_INTERVAL_MS, 60_000),
+)
 runtime.start()
 log.info("worker started", { healthPort: config.WORKER_HEALTH_PORT, dependencies })
 
@@ -63,6 +82,7 @@ async function shutdown(signal: string) {
   log.info("worker shutting down", { signal })
   clearInterval(dependencyTimer)
   clearInterval(scheduleTimer)
+  clearInterval(sealTimer)
   await runtime.stop().catch((error) => log.error("runtime stop failed", { error }))
   await db.destroy()
   probe.disconnect()

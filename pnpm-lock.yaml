@@ -105,6 +105,9 @@ importers:
       '@platform/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence
+      '@platform/integrity':
+        specifier: workspace:*
+        version: link:../../packages/integrity
       '@platform/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
@@ -117,6 +120,10 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+    devDependencies:
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
 
   packages/audit:
     dependencies:
@@ -222,6 +229,31 @@ importers:
       '@platform/shared':
         specifier: workspace:*
         version: link:../shared
+
+  packages/integrity:
+    dependencies:
+      '@platform/db':
+        specifier: workspace:*
+        version: link:../db
+      '@platform/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@platform/jobs':
+        specifier: workspace:*
+        version: link:../jobs
+      '@platform/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@platform/connectors':
+        specifier: workspace:*
+        version: link:../connectors
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
 
   packages/jobs:
     dependencies:
