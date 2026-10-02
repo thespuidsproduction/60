@@ -10,7 +10,8 @@ import {
 
 const config = {
   endpoint: process.env.TEST_S3_ENDPOINT ?? "http://127.0.0.1:9000",
-  bucket: `test-${randomUUID().slice(0, 8)}`,
+  // One shared bucket; isolation comes from random key prefixes per run.
+  bucket: process.env.TEST_S3_BUCKET ?? "platform-test",
   accessKeyId: process.env.TEST_S3_ACCESS_KEY_ID ?? "platform-dev",
   secretAccessKey: process.env.TEST_S3_SECRET_ACCESS_KEY ?? "platform-dev-only",
   forcePathStyle: true,
@@ -23,7 +24,12 @@ beforeAll(async () => {
     forcePathStyle: true,
     credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
   })
-  await client.send(new CreateBucketCommand({ Bucket: config.bucket }))
+  await client
+    .send(new CreateBucketCommand({ Bucket: config.bucket }))
+    .catch((error: { name?: string }) => {
+      if (error.name !== "BucketAlreadyOwnedByYou" && error.name !== "BucketAlreadyExists")
+        throw error
+    })
 })
 
 describe("S3 object store (R2-compatible)", () => {
@@ -57,7 +63,8 @@ describe("S3 object store (R2-compatible)", () => {
 
   it("reports missing objects", async () => {
     const store = createS3ObjectStore(config)
-    await expect(store.get("missing/key.json")).rejects.toBeInstanceOf(ObjectNotFoundError)
-    expect(await store.exists("missing/key.json")).toBe(false)
+    const missing = `missing/${randomUUID()}.json`
+    await expect(store.get(missing)).rejects.toBeInstanceOf(ObjectNotFoundError)
+    expect(await store.exists(missing)).toBe(false)
   })
 })
