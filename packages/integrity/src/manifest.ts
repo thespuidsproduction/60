@@ -1,6 +1,7 @@
 import { canonicalJson } from "@platform/shared"
 import { sha256Hex } from "@platform/evidence"
-import { evidenceLeafData, leafHash, LEAF_ENCODING, merkleRoot, MERKLE_ALGORITHM } from "./merkle"
+import type { LEAF_ENCODING, MERKLE_ALGORITHM } from "./merkle"
+import { evidenceLeafData, leafHash, merkleRoot } from "./merkle"
 
 /**
  * Integrity manifest document (dev bible §41). Serialised as canonical JSON;
