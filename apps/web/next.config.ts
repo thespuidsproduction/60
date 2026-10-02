@@ -5,7 +5,14 @@ const config: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   // Workspace packages ship TypeScript source.
-  transpilePackages: ["@platform/shared"],
+  transpilePackages: [
+    "@platform/shared",
+    "@platform/db",
+    "@platform/auth",
+    "@platform/audit",
+    "@platform/features",
+  ],
+  serverExternalPackages: ["pg"],
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
   async headers() {
     return [

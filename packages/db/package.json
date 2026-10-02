@@ -5,11 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./migrator": "./src/migrator.ts",
     "./testing": "./src/testing.ts"
   },
   "scripts": {
     "migrate": "tsx src/cli/migrate.ts",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "create-app-login": "tsx src/cli/create-app-login.ts"
   },
   "dependencies": {
     "@platform/shared": "workspace:*",
@@ -18,6 +20,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@types/pg": "^8.23.1"
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15"
   }
 }

@@ -7,7 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "bootstrap": "tsx src/cli/bootstrap.ts"
   },
   "dependencies": {
     "@platform/audit": "workspace:*",
@@ -15,5 +16,8 @@
     "@platform/shared": "workspace:*",
     "otplib": "^13.5.0",
     "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }

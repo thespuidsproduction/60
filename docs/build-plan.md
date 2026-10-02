@@ -22,8 +22,11 @@ North star: the implementation acceptance test (§142).
 - [x] Tenant model (organisations, users, memberships) + provisioning
 - [x] `packages/auth`: opaque sessions, scrypt passwords, lockout, TOTP MFA (encrypted secret, replay protection, hashed backup codes), step-up auth
 - [x] RBAC: customer roles + permissions, enforced server-side (`authorize`)
+- [x] Web auth: cookie sessions, Origin (CSRF) checks, error envelope, auth API routes, sign-in / MFA / workspace pages
+- [x] CLIs: `db:migrate`, `create-app-login`, tenant `bootstrap`
+- [ ] IP-level login rate limiting via Redis (with worker runtime); per-account lockout is done
 - [x] Append-only audit log (`packages/audit`, DB-enforced)
-- [ ] `packages/features`: feature states (ON / OFF / BETA / INTERNAL), per environment and tenant
+- [x] `packages/features`: registry + feature states (ON / OFF / BETA / INTERNAL), per environment and tenant, audited changes, server guard
 - [ ] §101 schema: foundation, connector, evidence and integrity tables (rest per module, D-011)
 - [ ] Evidence vault (R2/S3 client, §109 layout)
 - [ ] Worker runtime: BullMQ queues mirrored in PostgreSQL job records, transactional outbox
