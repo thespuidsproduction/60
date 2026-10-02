@@ -197,12 +197,19 @@ importers:
       '@platform/db':
         specifier: workspace:*
         version: link:../db
+      '@platform/jobs':
+        specifier: workspace:*
+        version: link:../jobs
       '@platform/shared':
         specifier: workspace:*
         version: link:../shared
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+    devDependencies:
+      '@platform/connectors':
+        specifier: workspace:*
+        version: link:../connectors
 
   packages/features:
     dependencies:

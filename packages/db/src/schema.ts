@@ -236,6 +236,131 @@ export interface ConnectorCursorsTable {
   updated_at: Generated<Date>
 }
 
+export type TrustLevel = "A" | "B" | "C" | "D" | "E"
+export type Severity = "info" | "low" | "medium" | "high" | "critical"
+export type VerificationResult = "verified" | "pending" | "failed"
+
+export interface TenantSequencesTable {
+  tenant_id: string
+  name: string
+  next_value: Generated<string>
+}
+
+export interface RawEvidenceObjectsTable {
+  id: string
+  tenant_id: string
+  reference: string
+  source: string
+  connector_id: string | null
+  sync_run_id: string | null
+  source_tenant: string
+  source_object_id: string
+  source_event_id: string | null
+  object_type: string
+  source_api: string
+  media_type: Generated<string>
+  occurred_at: NullableTimestamp
+  observed_at: Timestamp
+  ingested_at: Generated<Date>
+  raw_sha256: string
+  size_bytes: number
+  storage_object_key: string
+  trust_level: TrustLevel
+  classification: Generated<string>
+  retention_class: Generated<string>
+  retention_until: NullableTimestamp
+  dedup_key: string
+  created_at: Generated<Date>
+}
+
+export interface EvidenceQuarantineTable {
+  id: string
+  tenant_id: string
+  connector_id: string | null
+  sync_run_id: string | null
+  reason: string
+  raw_sha256: string
+  size_bytes: number
+  storage_object_key: string
+  captured_at: Generated<Date>
+}
+
+export interface EvidenceEventsTable {
+  id: Generated<string>
+  tenant_id: string
+  raw_object_id: string
+  event_type: string
+  category: string
+  severity: Severity
+  description: string
+  source_type: string
+  source_id: string | null
+  source_event_id: string | null
+  subject_type: string | null
+  subject_id: string | null
+  asset_type: string | null
+  asset_id: string | null
+  occurred_at: NullableTimestamp
+  observed_at: Timestamp
+  ingested_at: Timestamp
+  time_confidence: "source" | "observed" | "unknown"
+  raw_sha256: string
+  normalized_payload: ColumnType<unknown, string, string>
+  normalized_sha256: string
+  schema_version: string
+  transformer: string
+  transformer_version: string
+  trust_level: TrustLevel
+  created_at: Generated<Date>
+}
+
+export interface SigningKeysTable {
+  id: string
+  algorithm: "ed25519"
+  public_key: string
+  status: Generated<"active" | "retired">
+  created_at: Generated<Date>
+  retired_at: NullableTimestamp
+}
+
+export interface IntegrityManifestsTable {
+  id: string
+  tenant_id: string
+  sequence: ColumnType<string, number | string, number | string>
+  manifest_version: number
+  source: string
+  period_start: Timestamp
+  period_end: Timestamp
+  item_count: number
+  merkle_root: string
+  previous_manifest_id: string | null
+  previous_manifest_hash: string | null
+  manifest_sha256: string
+  signature: string
+  signing_key_id: string
+  storage_object_key: string
+  created_at: Timestamp
+}
+
+export interface IntegrityManifestItemsTable {
+  manifest_id: string
+  leaf_index: number
+  raw_object_id: string
+  tenant_id: string
+  raw_sha256: string
+}
+
+export interface EvidenceVerificationsTable {
+  id: Generated<string>
+  tenant_id: string
+  raw_object_id: string
+  manifest_id: string | null
+  result: VerificationResult
+  checks: ColumnType<unknown, string, string>
+  verified_by: string
+  verified_at: Generated<Date>
+}
+
 export interface Database {
   organisations: OrganisationsTable
   users: UsersTable
@@ -250,6 +375,14 @@ export interface Database {
   connector_credentials: ConnectorCredentialsTable
   connector_sync_runs: ConnectorSyncRunsTable
   connector_cursors: ConnectorCursorsTable
+  tenant_sequences: TenantSequencesTable
+  raw_evidence_objects: RawEvidenceObjectsTable
+  evidence_quarantine: EvidenceQuarantineTable
+  evidence_events: EvidenceEventsTable
+  signing_keys: SigningKeysTable
+  integrity_manifests: IntegrityManifestsTable
+  integrity_manifest_items: IntegrityManifestItemsTable
+  evidence_verifications: EvidenceVerificationsTable
 }
 
 export type Organisation = Selectable<OrganisationsTable>
@@ -264,3 +397,6 @@ export type JobRecord = Selectable<JobRecordsTable>
 export type OutboxEvent = Selectable<OutboxEventsTable>
 export type Connector = Selectable<ConnectorsTable>
 export type ConnectorSyncRun = Selectable<ConnectorSyncRunsTable>
+export type RawEvidenceObject = Selectable<RawEvidenceObjectsTable>
+export type EvidenceEvent = Selectable<EvidenceEventsTable>
+export type IntegrityManifest = Selectable<IntegrityManifestsTable>
