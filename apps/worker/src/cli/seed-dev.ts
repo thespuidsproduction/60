@@ -1,3 +1,4 @@
+import { provisionMember } from "@platform/auth"
 import { connectIntegration, createConnectorRegistry, runConnectorSync } from "@platform/connectors"
 import { fixtureAdapter, startFakeUpstream } from "@platform/connectors/testing"
 import { createDb, withSystem } from "@platform/db"
@@ -145,6 +146,16 @@ try {
     trx.selectFrom("organisations").select("id").where("slug", "=", slug).executeTakeFirstOrThrow(),
   )
   await registerSigningKeys(db, config.MANIFEST_SIGNING_KEYS)
+  // A CISO who can view and verify evidence (the bootstrap ADMIN cannot, by design).
+  await provisionMember(db, {
+    tenantId: tenant.id,
+    email: "morgan.hale@acme.example",
+    displayName: "Morgan Hale",
+    password: process.env.SEED_USER_PASSWORD ?? "local ciso password",
+    role: "CISO",
+    actor: { type: "system", label: "seed-dev" },
+    reason: "local development seed",
+  })
   const secretBox = createSecretBox(parseKeyRing(config.DATA_ENCRYPTION_KEYS))
   const registry = createConnectorRegistry([fixtureAdapter])
   const { connectorId } = await connectIntegration(

@@ -7,6 +7,7 @@ import {
 } from "@platform/auth"
 import { Redis } from "ioredis"
 import { createDb, type Db } from "@platform/db"
+import { objectStoreFromEnv, type ObjectStore } from "@platform/evidence"
 import { createFeatureService, type FeatureService } from "@platform/features"
 import {
   createLogger,
@@ -22,6 +23,7 @@ interface Services {
   auth: AuthService
   features: FeatureService
   rateLimiter: RateLimiter
+  store: ObjectStore
   log: Logger
 }
 
@@ -49,6 +51,7 @@ export function services(): Services {
       prefix: `${env.APP_ENV}:ratelimit`,
       onError: (error) => log.error("rate limiter unavailable; failing open", { error }),
     }),
+    store: objectStoreFromEnv(),
     log,
   }
   globalForServices.__platformServices = created

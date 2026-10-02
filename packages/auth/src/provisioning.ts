@@ -60,3 +60,63 @@ export async function provisionOrganisation(
     return { organisation: org, userId: user.id, createdUser: !existing }
   })
 }
+
+/**
+ * Adds a user to an existing tenant with a role, creating the user if needed.
+ * Caller must have authorised `users:manage` (with step-up) or be internal tooling.
+ */
+export async function provisionMember(
+  db: Db,
+  input: {
+    tenantId: string
+    email: string
+    displayName: string
+    password: string
+    role: CustomerRole
+    actor: AuditActor
+    reason: string
+  },
+) {
+  assertPasswordPolicy(input.password)
+  const passwordHash = await hashPassword(input.password)
+  return withSystem(db, "provision.member", async (trx) => {
+    const existing = await trx
+      .selectFrom("users")
+      .select("id")
+      .where((eb) => eb(eb.fn("lower", ["email"]), "=", input.email.trim().toLowerCase()))
+      .executeTakeFirst()
+    const user =
+      existing ??
+      (await trx
+        .insertInto("users")
+        .values({
+          email: input.email.trim(),
+          display_name: input.displayName,
+          password_hash: passwordHash,
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow())
+    const membership = await trx
+      .selectFrom("memberships")
+      .select(["id", "role"])
+      .where("tenant_id", "=", input.tenantId)
+      .where("user_id", "=", user.id)
+      .where("revoked_at", "is", null)
+      .executeTakeFirst()
+    if (!membership) {
+      await trx
+        .insertInto("memberships")
+        .values({ tenant_id: input.tenantId, user_id: user.id, role: input.role })
+        .execute()
+      await recordAudit(trx, {
+        tenantId: input.tenantId,
+        actor: input.actor,
+        action: "membership.granted",
+        target: { type: "user", id: user.id },
+        newState: { role: input.role },
+        reason: input.reason,
+      })
+    }
+    return { userId: user.id, createdUser: !existing, role: membership?.role ?? input.role }
+  })
+}

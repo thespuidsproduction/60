@@ -14,6 +14,10 @@ APP_DB_PASSWORD=change-me pnpm --filter @platform/db create-app-login
 BOOTSTRAP_ADMIN_PASSWORD='a long local password' pnpm --filter @platform/auth bootstrap \
   --slug acme --name "Acme MSP" --email admin@acme.example --display-name "Admin" --reason "local dev"
 
+# Evidence: create the local bucket once, then run the full pipeline against the
+# reference fixture connector (capture → R2 → normalise → seal + sign). Local only.
+pnpm --filter @platform/worker seed-dev -- acme   # also creates morgan.hale@acme.example (CISO)
+
 pnpm dev:web       # http://localhost:3000/login
 pnpm dev:worker    # health on http://localhost:8081/health
 ```

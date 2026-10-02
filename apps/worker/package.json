@@ -11,6 +11,7 @@
     "seed-dev": "tsx src/cli/seed-dev.ts"
   },
   "dependencies": {
+    "@platform/auth": "workspace:*",
     "@platform/connectors": "workspace:*",
     "@platform/db": "workspace:*",
     "@platform/evidence": "workspace:*",

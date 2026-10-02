@@ -268,3 +268,49 @@ export async function getEvidenceDetail(trx: Tx, id: string) {
 }
 
 export type EvidenceDetail = NonNullable<Awaited<ReturnType<typeof getEvidenceDetail>>>
+
+/** Evidence health summary for the Assurance header. Tenant-scoped. */
+export async function evidenceSummary(trx: Tx) {
+  const row = await trx
+    .selectFrom("raw_evidence_objects as r")
+    .leftJoin("integrity_manifest_items as i", "i.raw_object_id", "r.id")
+    .select([
+      sql<string>`count(*)`.as("objects"),
+      sql<string>`count(i.raw_object_id)`.as("sealed"),
+      sql<Date | null>`max(r.ingested_at)`.as("latest"),
+      sql<string>`count(distinct r.source)`.as("sources"),
+    ])
+    .executeTakeFirstOrThrow()
+  const [manifests, quarantined, failed] = await Promise.all([
+    trx
+      .selectFrom("integrity_manifests")
+      .select(sql<string>`count(*)`.as("n"))
+      .executeTakeFirstOrThrow(),
+    trx
+      .selectFrom("evidence_quarantine")
+      .select(sql<string>`count(*)`.as("n"))
+      .executeTakeFirstOrThrow(),
+    trx
+      .selectFrom(
+        trx
+          .selectFrom("evidence_verifications")
+          .select(["raw_object_id", "result"])
+          .distinctOn("raw_object_id")
+          .where("result", "in", ["verified", "failed"])
+          .orderBy("raw_object_id")
+          .orderBy("verified_at", "desc")
+          .as("latest"),
+      )
+      .select(sql<string>`count(*) filter (where result = 'failed')`.as("n"))
+      .executeTakeFirstOrThrow(),
+  ])
+  return {
+    objects: Number(row.objects),
+    sealed: Number(row.sealed),
+    sources: Number(row.sources),
+    latestIngestedAt: row.latest ? new Date(row.latest).toISOString() : null,
+    manifests: Number(manifests.n),
+    quarantined: Number(quarantined.n),
+    integrityFailures: Number(failed.n),
+  }
+}

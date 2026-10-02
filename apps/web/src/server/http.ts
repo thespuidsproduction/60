@@ -1,5 +1,6 @@
 import "server-only"
 import { AuthError } from "@platform/auth"
+import { ObjectIntegrityError } from "@platform/evidence"
 import { FeatureUnavailableError } from "@platform/features"
 import { z } from "zod"
 import { webEnv } from "./env"
@@ -39,6 +40,17 @@ export function handler(fn: (request: Request) => Promise<Response>) {
         return errorResponse(404, "FEATURE_UNAVAILABLE", error.message)
       if (error instanceof OriginError)
         return errorResponse(403, "BAD_ORIGIN", "Cross-origin request rejected.")
+      if (error instanceof ObjectIntegrityError) {
+        services().log.error("evidence integrity failure on read", {
+          path: new URL(request.url).pathname,
+        })
+        return errorResponse(
+          409,
+          "INTEGRITY_FAILURE",
+          "Stored evidence failed its integrity check. It has not been shown.",
+        )
+      }
+      if (error instanceof NotFoundError) return errorResponse(404, "NOT_FOUND", "Not found.")
       if (error instanceof z.ZodError)
         return errorResponse(400, "VALIDATION_FAILED", "Request validation failed.")
       services().log.error("unhandled route error", { error, path: new URL(request.url).pathname })
@@ -48,6 +60,8 @@ export function handler(fn: (request: Request) => Promise<Response>) {
 }
 
 class OriginError extends Error {}
+
+export class NotFoundError extends Error {}
 
 function assertSameOrigin(request: Request) {
   const origin = request.headers.get("origin")

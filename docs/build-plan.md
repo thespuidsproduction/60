@@ -35,11 +35,17 @@ North star: the implementation acceptance test (§142).
 
 ## Milestone 2 — Evidence core (§90.11–18)
 
-- [ ] Evidence capture sink: raw envelope → R2 → SHA-256 → provenance → `raw_evidence_objects`
-- [ ] Register `connector.sync` in the worker once the sink exists
-- [ ] Schema/transformer versioning, normalisation, reprocessing
-- [ ] Evidence Explorer (UI foundation: shell, Kokonut, GSAP, themes)
-- [ ] Merkle manifests, Ed25519 signing, key rotation, verification
+- [x] Raw evidence capture: canonical envelope → SHA-256 → write-once R2 → provenance row + EvidenceCaptured (one transaction), dedup (§71), quarantine (§1.3)
+- [x] Append-only evidence tables, per-tenant `EV-` references, three-time model, trust levels, classification
+- [x] Schema/transformer versioning, normalisation job, reprocessing that adds rather than rewrites (§112)
+- [x] RFC 6962 Merkle manifests per tenant/source/hour, per-tenant hash chain, Ed25519 signing with rotation and historical keys (§41, §120)
+- [x] Seven-step verification (§15) and whole-chain verification, results append-only
+- [x] Worker: `connector.sync`, `evidence.normalise` (on EvidenceCaptured), `integrity.seal` (scheduled)
+- [x] Evidence API (`/api/v1/evidence`, detail, raw, verify) with server-side permissions
+- [x] UI foundation: app shell and navigation (§87), semantic + motion tokens, Midnight/Limestone with GSAP transition (§77), reduced motion, shadcn-pattern components (D-016)
+- [x] Evidence Explorer (§19): query language, filters, provenance panel, normalised versions, hash-verified raw source, animated verification sequence
+- [x] Local `seed-dev` running the full pipeline; queue path verified with the real worker
+- [ ] Playwright end-to-end suite in CI (login, evidence inspection, verification) — scripted locally, to be added to CI
 
 ## Milestone 3 — Microsoft first (§90.19–22), then ConnectWise PSA and NinjaOne (D-002)
 

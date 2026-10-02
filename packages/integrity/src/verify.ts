@@ -48,6 +48,13 @@ export interface EvidenceVerification {
 
 const CLOCK_SKEW_MS = 5 * 60 * 1000
 
+export class EvidenceNotFoundError extends Error {
+  constructor() {
+    super("Evidence not found")
+    this.name = "EvidenceNotFoundError"
+  }
+}
+
 export interface VerifyDependencies {
   db: Db
   store: ObjectStore
@@ -151,7 +158,7 @@ export async function verifyEvidence(
       .selectAll()
       .where("id", "=", input.evidenceId)
       .executeTakeFirst()
-    if (!row) throw new Error("Evidence not found")
+    if (!row) throw new EvidenceNotFoundError()
 
     const checks: CheckResult[] = []
     const add = (check: VerificationCheck, status: CheckStatus, detail: string) =>
