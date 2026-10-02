@@ -1,0 +1,80 @@
+/*
+ * Semantic design tokens (dev bible §75, §76, §135).
+ * Components consume tokens only; themes change token values, never component logic.
+ * Default theme is Midnight. Limestone is applied with [data-theme="limestone"].
+ */
+:root,
+[data-theme="midnight"] {
+  color-scheme: dark;
+
+  --bg-app: #112532;
+  --bg-surface: #1b2d38;
+  --bg-elevated: #223643;
+
+  --text-primary: #f3efe9;
+  --text-muted: #a9aaa5;
+
+  --accent-primary: #f4b044;
+  --accent-secondary: #88a5b7;
+
+  --status-healthy: #174a3a;
+  --status-healthy-strong: #1e5a46;
+  --status-warning: #e0680e;
+  --status-critical: #a84a46;
+  --status-unknown: #88a5b7;
+  --status-on-fill: #f3efe9;
+
+  --border-subtle: rgb(136 165 183 / 0.16);
+  --border-active: #f4b044;
+  --highlight-inner: rgb(243 239 233 / 0.03);
+}
+
+[data-theme="limestone"] {
+  color-scheme: light;
+
+  --bg-app: #f1ece6;
+  --bg-surface: #ddd5cd;
+  --bg-elevated: #e8e1da;
+
+  --text-primary: #2e2e2e;
+  --text-muted: #5f5d58;
+
+  --accent-primary: #c88e32;
+  --accent-secondary: #7d4047;
+  --accent-deep: #112532;
+
+  --status-healthy: #174a3a;
+  --status-healthy-strong: #1e5a46;
+  --status-warning: #b5543a;
+  --status-critical: #a84a46;
+  --status-unknown: #5f5d58;
+  --status-on-fill: #f3efe9;
+
+  --border-subtle: rgb(17 37 50 / 0.14);
+  --border-active: #c88e32;
+  --highlight-inner: rgb(255 255 255 / 0.35);
+}
+
+/*
+ * Motion tokens (§79, §136). JS motion presets in src/lib/motion.ts mirror these.
+ */
+:root {
+  --motion-micro: 150ms;
+  --motion-control: 190ms;
+  --motion-panel: 280ms;
+  --motion-route: 380ms;
+  --motion-dashboard: 520ms;
+  --motion-graph: 700ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-micro: 0ms;
+    --motion-control: 0ms;
+    --motion-panel: 0ms;
+    --motion-route: 0ms;
+    --motion-dashboard: 0ms;
+    --motion-graph: 0ms;
+  }
+}

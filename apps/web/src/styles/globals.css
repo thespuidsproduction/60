@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme inline {
+  --color-app: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-fg: var(--text-primary);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-healthy: var(--status-healthy);
+  --color-healthy-strong: var(--status-healthy-strong);
+  --color-warning: var(--status-warning);
+  --color-critical: var(--status-critical);
+  --color-unknown: var(--status-unknown);
+  --color-on-fill: var(--status-on-fill);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-active: var(--border-active);
+
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html,
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--border-active);
+  outline-offset: 2px;
+}

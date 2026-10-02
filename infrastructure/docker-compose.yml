@@ -1,0 +1,27 @@
+# Production-shaped composition for Hetzner (dev bible §53, §56).
+# PostgreSQL (Supabase) and object storage (Cloudflare R2) are external managed services.
+services:
+  web:
+    image: ${WEB_IMAGE:-platform-web:latest}
+    env_file: .env
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on: [redis]
+    restart: unless-stopped
+
+  worker:
+    image: ${WORKER_IMAGE:-platform-worker:latest}
+    env_file: .env
+    depends_on: [redis]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # BullMQ needs persistence and must never evict job keys.
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:
