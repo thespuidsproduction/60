@@ -8,6 +8,7 @@ const webEnvSchema = baseEnvSchema.extend({
   DATA_ENCRYPTION_KEYS: z.string().min(1),
   /** Public origin, e.g. https://app.example.com — used for Origin checks. */
   APP_ORIGIN: z.string().url(),
+  REDIS_URL: z.string().url(),
 })
 
 export type WebEnv = z.infer<typeof webEnvSchema>

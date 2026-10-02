@@ -114,6 +114,128 @@ export interface FeatureStatesTable {
   updated_at: Generated<Date>
 }
 
+export const queueNames = [
+  "connector-sync",
+  "evidence-process",
+  "integrity",
+  "incident-analysis",
+  "report-generation",
+  "notifications",
+  "ai-analysis",
+  "maintenance",
+] as const
+export type QueueName = (typeof queueNames)[number]
+
+export type JobStatus = "queued" | "running" | "retrying" | "succeeded" | "dead"
+
+export interface JobRecordsTable {
+  id: Generated<string>
+  tenant_id: string | null
+  queue: QueueName
+  job_type: string
+  idempotency_key: string
+  correlation_id: string
+  status: Generated<JobStatus>
+  payload: ColumnType<unknown, string | undefined, string>
+  attempts: Generated<number>
+  max_attempts: Generated<number>
+  last_error: string | null
+  run_after: Timestamp
+  dispatched_at: NullableTimestamp
+  started_at: NullableTimestamp
+  finished_at: NullableTimestamp
+  created_at: Generated<Date>
+  updated_at: Generated<Date>
+}
+
+export interface OutboxEventsTable {
+  seq: Generated<string>
+  id: Generated<string>
+  tenant_id: string | null
+  event_type: string
+  aggregate_type: string
+  aggregate_id: string
+  payload: ColumnType<unknown, string | undefined, string>
+  correlation_id: string
+  created_at: Generated<Date>
+  published_at: NullableTimestamp
+}
+
+export const connectorStatuses = [
+  "pending",
+  "healthy",
+  "degraded",
+  "failed",
+  "disconnected",
+] as const
+export type ConnectorStatus = (typeof connectorStatuses)[number]
+
+export interface ConnectorsTable {
+  id: Generated<string>
+  tenant_id: string
+  connector_type: string
+  display_name: string
+  source_tenant: string | null
+  status: Generated<ConnectorStatus>
+  capabilities: ColumnType<string[], string[] | undefined, string[]>
+  granted_permissions: ColumnType<string[], string[] | undefined, string[]>
+  connector_version: string
+  config: ColumnType<unknown, string | undefined, string>
+  credential_ref: string | null
+  last_sync_at: NullableTimestamp
+  last_success_at: NullableTimestamp
+  last_error_at: NullableTimestamp
+  last_error: string | null
+  consecutive_failures: Generated<number>
+  created_at: Generated<Date>
+  created_by: string | null
+  updated_at: Generated<Date>
+  disconnected_at: NullableTimestamp
+}
+
+export interface ConnectorCredentialsTable {
+  id: Generated<string>
+  tenant_id: string
+  connector_id: string
+  secret_enc: string
+  key_id: string
+  created_at: Generated<Date>
+  created_by: string
+  revoked_at: NullableTimestamp
+}
+
+export type SyncMode = "baseline" | "incremental"
+export type SyncRunStatus = "running" | "succeeded" | "partial" | "failed"
+
+export interface ConnectorSyncRunsTable {
+  id: Generated<string>
+  tenant_id: string
+  connector_id: string
+  job_id: string | null
+  mode: SyncMode
+  status: Generated<SyncRunStatus>
+  requested_at: Generated<Date>
+  started_at: NullableTimestamp
+  finished_at: NullableTimestamp
+  source_api: string | null
+  cursor_before: Json
+  cursor_after: Json
+  objects_captured: Generated<number>
+  duplicates: Generated<number>
+  failures: Generated<number>
+  response_state: string | null
+  error_summary: string | null
+  attempt: Generated<number>
+}
+
+export interface ConnectorCursorsTable {
+  connector_id: string
+  stream: string
+  tenant_id: string
+  cursor: ColumnType<unknown, string, string>
+  updated_at: Generated<Date>
+}
+
 export interface Database {
   organisations: OrganisationsTable
   users: UsersTable
@@ -122,6 +244,12 @@ export interface Database {
   sessions: SessionsTable
   audit_entries: AuditEntriesTable
   feature_states: FeatureStatesTable
+  job_records: JobRecordsTable
+  outbox_events: OutboxEventsTable
+  connectors: ConnectorsTable
+  connector_credentials: ConnectorCredentialsTable
+  connector_sync_runs: ConnectorSyncRunsTable
+  connector_cursors: ConnectorCursorsTable
 }
 
 export type Organisation = Selectable<OrganisationsTable>
@@ -132,3 +260,7 @@ export type Membership = Selectable<MembershipsTable>
 export type Session = Selectable<SessionsTable>
 export type AuditEntry = Selectable<AuditEntriesTable>
 export type FeatureState = Selectable<FeatureStatesTable>
+export type JobRecord = Selectable<JobRecordsTable>
+export type OutboxEvent = Selectable<OutboxEventsTable>
+export type Connector = Selectable<ConnectorsTable>
+export type ConnectorSyncRun = Selectable<ConnectorSyncRunsTable>

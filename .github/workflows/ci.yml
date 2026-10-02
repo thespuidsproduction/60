@@ -53,15 +53,22 @@ jobs:
     env:
       TEST_DATABASE_ADMIN_URL: postgres://platform:platform@127.0.0.1:5432/platform
       TEST_REDIS_URL: redis://127.0.0.1:6379
+      TEST_S3_ENDPOINT: http://127.0.0.1:9000
     steps:
       - uses: actions/checkout@v4
+      - name: Start S3-compatible store (SeaweedFS, stands in for R2)
+        run: |
+          docker run -d --name s3 -p 127.0.0.1:9000:9000 \
+            -v "$PWD/infrastructure/seaweedfs-s3.dev.json:/etc/seaweedfs/s3.json:ro" \
+            chrislusf/seaweedfs:latest server -dir=/data -s3 -s3.port=9000 -s3.config=/etc/seaweedfs/s3.json
+          for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:9000/ && break; sleep 1; done
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Integration tests (RLS, cross-tenant isolation, auth)
+      - name: Integration tests (RLS, isolation, auth, jobs, storage, connectors)
         run: pnpm test:integration
 
   security:

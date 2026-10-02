@@ -9,15 +9,13 @@ WORKDIR /repo
 FROM base AS build
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# The worker bundles its dependencies into dist/ (see apps/worker/build.mjs).
 RUN pnpm --filter @platform/worker build
-RUN pnpm --filter @platform/worker --prod deploy --legacy /out
 
 FROM node:22-alpine AS runtime
 ENV NODE_ENV=production WORKER_HEALTH_PORT=8081
 WORKDIR /app
 RUN addgroup -S app && adduser -S app -G app
-COPY --from=build --chown=app:app /out/package.json ./package.json
-COPY --from=build --chown=app:app /out/node_modules ./node_modules
 COPY --from=build --chown=app:app /repo/apps/worker/dist ./dist
 USER app
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
